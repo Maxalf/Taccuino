@@ -302,6 +302,42 @@ ul.chk li.done::before{background:var(--accent); border-color:var(--accent); box
 .sug span{flex:1; min-width:0}
 .hint{font-size:12px; color:var(--muted)}
 
+/* ---------- selezione multipla */
+.selbar{position:fixed; left:0; right:0; top:0; z-index:9; display:flex; align-items:center; gap:2px; background:var(--surface); color:var(--fg); box-shadow:var(--shadow);
+  padding:calc(8px + env(safe-area-inset-top,0px)) var(--gut-r) 8px calc(var(--gut-l) - 8px)}
+.selbar .count{flex:1; min-width:0; font-size:17px; font-weight:500; padding-left:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.selbar .ib.on{color:var(--accent)}
+.card{transition:box-shadow .2s, border-color .2s, transform .15s}
+.card:active{transform:scale(.985)}
+.card > .tick{position:absolute; top:7px; right:7px; z-index:3; width:24px; height:24px; border-radius:12px; box-sizing:border-box; display:flex; align-items:center; justify-content:center;
+  background:var(--surface); border:2px solid var(--muted); color:transparent; opacity:0; transform:scale(.5); transition:opacity .18s, transform .22s cubic-bezier(.2,.8,.2,1.4), background .18s, border-color .18s; pointer-events:none}
+.card > .tick .ic{width:15px; height:15px; stroke-width:2.8}
+body.selecting .card > .tick{opacity:.85; transform:none}
+body.selecting .card.pinned::after{opacity:0}
+.card h3,.card .cq-src{padding-right:26px}
+.toast span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.card.sel > .tick{background:var(--accent); border-color:var(--accent); color:var(--accent-fg); opacity:1}
+.card.sel{box-shadow:0 0 0 2px var(--accent); border-color:transparent}
+.quick{transition:translate .28s cubic-bezier(.2,.8,.2,1)}
+body.selecting .quick{translate:0 140%}
+.toast{display:flex; align-items:center; gap:14px}
+.toast.act{pointer-events:auto}
+.tbtn{border:0; background:transparent; color:#AFC0FF; font-weight:600; font-size:14px; padding:6px 2px}
+ul.chk li::before{transition:background .15s, box-shadow .15s}
+.seg button{transition:background .2s, box-shadow .2s}
+.chip,.sw,.ib,.btn{transition:background .15s, transform .12s, box-shadow .15s}
+.btn:active,.ib:active,.sw:active{transform:scale(.96)}
+.pop{transform-origin:50% 0}
+
+.round.sync{position:relative}
+.sdot{position:absolute; top:8px; right:8px; width:10px; height:10px; border-radius:5px; background:transparent; box-shadow:0 0 0 2px var(--surface); transition:background .2s}
+.sync[data-state=pending] .sdot{background:var(--accent)}
+.sync[data-state=auth] .sdot{background:#D98A1E}
+.sync[data-state=err] .sdot{background:var(--danger)}
+.sync[data-state=busy] .ic{animation:spin 1.1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (max-width:420px){ .top .round{width:44px; height:44px} .search{padding:0 12px} }
+
 @media (prefers-reduced-motion: reduce){ *{transition:none!important; animation:none!important} }
 
 </style>
@@ -333,7 +369,11 @@ ul.chk li.done::before{background:var(--accent); border-color:var(--accent); box
   <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18h10.5a4 4 0 0 0 .5-8 6 6 0 0 0-11.5-1.5A4.5 4.5 0 0 0 7 18z"/></symbol>
   <symbol id="i-pinup" viewBox="0 0 24 24"><path d="M9 4h6l-1 6 3 3H7l3-3zM12 13v7"/></symbol>
   <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></symbol>
+  <symbol id="i-sync" viewBox="0 0 24 24"><path d="M19.5 10.5A7.5 7.5 0 0 0 6.2 7.2L4.5 9"/><path d="M4.5 4.5V9H9"/><path d="M4.5 13.5a7.5 7.5 0 0 0 13.3 3.3l1.7-1.8"/><path d="M19.5 19.5V15H15"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.2 0 1.8-.9 1.4-1.9-.5-1.2.3-2.4 1.6-2.4H17a3.5 3.5 0 0 0 3.5-3.5c0-5-3.8-9.2-8.5-9.2z"/><circle cx="8" cy="11.5" r="1.2"/><circle cx="11" cy="7.5" r="1.2"/><circle cx="15.5" cy="8.5" r="1.2"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="M8.2 10.8l7.6-4.1M8.2 13.2l7.6 4.1"/></symbol>
+  <symbol id="i-checkall" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="3"/><path d="M8 12.5l3 3 5.5-6"/></symbol>
 </svg>
 
 <div id="app">
@@ -341,6 +381,7 @@ ul.chk li.done::before{background:var(--accent); border-color:var(--accent); box
     <label class="search"><svg class="ic s"><use href="#i-search"/></svg><span class="vh">Cerca</span>
       <input id="q" type="search" placeholder="Cerca nelle note" autocomplete="off" enterkeyhint="search"></label>
     <button id="btnOrbit" class="round" aria-label="Vista orbita"><svg class="ic"><use href="#i-orbit"/></svg></button>
+    <button id="btnSync" class="round sync" hidden aria-label="Sincronizzazione"><svg class="ic"><use href="#i-sync"/></svg><span class="sdot"></span></button>
     <button id="btnSettings" class="round" aria-label="Impostazioni"><svg class="ic"><use href="#i-gear"/></svg></button>
   </header>
   <div class="subbar">
@@ -348,6 +389,15 @@ ul.chk li.done::before{background:var(--accent); border-color:var(--accent); box
     <span id="activeFilter"></span>
     <span class="grow"></span>
     <button id="btnFilter" class="ghost"><svg class="ic s"><use href="#i-tag"/></svg>Filtra</button>
+  </div>
+  <div id="selbar" class="selbar" hidden role="toolbar" aria-label="Note selezionate">
+    <button id="selClose" class="ib" aria-label="Annulla selezione"><svg class="ic"><use href="#i-close"/></svg></button>
+    <span id="selCount" class="count" aria-live="polite">1 selezionata</span>
+    <button id="selAll" class="ib" aria-label="Seleziona tutte"><svg class="ic"><use href="#i-checkall"/></svg></button>
+    <button id="selPin" class="ib" aria-label="Fissa in alto"><svg class="ic"><use href="#i-pinup"/></svg></button>
+    <button id="selColor" class="ib" aria-label="Cambia colore"><svg class="ic"><use href="#i-palette"/></svg></button>
+    <button id="selShare" class="ib" aria-label="Condividi"><svg class="ic"><use href="#i-share"/></svg></button>
+    <button id="selDelete" class="ib" aria-label="Elimina"><svg class="ic"><use href="#i-trash"/></svg></button>
   </div>
   <main id="board" class="board" aria-label="Bacheca"></main>
   <div id="empty" class="empty" hidden></div>
@@ -479,6 +529,7 @@ ul.chk li.done::before{background:var(--accent); border-color:var(--accent); box
 <input id="fKeep" type="file" accept=".zip,application/zip" hidden>
 <input id="fBackup" type="file" accept=".json,application/json" hidden>
 
+<script src="config.js"></script>
 <script>
 'use strict';
 (() => {
@@ -497,7 +548,23 @@ const normTxt = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀
 const TESS = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
 const JSZIP = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
 
-function toast(msg, ms = 2800) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('on'), ms); }
+function toast(msg, ms = 2800, act) {
+  const t = $('#toast'); t.innerHTML = `<span>${esc(msg)}</span>` + (act ? `<button class="tbtn">${esc(act.label)}</button>` : '');
+  t.classList.toggle('act', !!act); if (act) t.querySelector('button').onclick = () => { t.classList.remove('on'); clearTimeout(t._t); act.fn(); };
+  t.classList.add('on'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('on'), ms);
+}
+const EASE = 'cubic-bezier(.2,.8,.2,1)', EASE_IN = 'cubic-bezier(.4,0,1,1)';
+function anim(el, kf, o = {}) { if (REDUCED || !el || !el.animate) return Promise.resolve(); const a = el.animate(kf, { duration: 220, easing: EASE, ...o }); return a.finished.then(() => a, () => a); }
+function show(el, kf, o) { el.getAnimations().forEach(a => a.cancel()); el._closing = false; el.hidden = false; return anim(el, kf, o); }
+async function hide(el, kf, o = {}) {
+  if (el.hidden) return; el._closing = true;
+  if (REDUCED || !el.animate) { el.hidden = true; el._closing = false; return; }
+  const a = el.animate(kf, { duration: 180, easing: EASE_IN, fill: 'forwards', ...o });
+  try { await a.finished; } catch (e) { }
+  if (el._closing) { el.hidden = true; el._closing = false; a.cancel(); }
+}
+const FULL_IN = [{ opacity: 0, transform: 'scale(.985)' }, { opacity: 1, transform: 'none' }], FULL_OUT = [{ opacity: 1 }, { opacity: 0, transform: 'scale(.985)' }];
+const showFull = el => show(el, FULL_IN, { duration: 240 }), hideFull = el => hide(el, FULL_OUT, { duration: 180 });
 function el(html) { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; }
 function hhmm(d) { return d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }); }
 function fmtTime(ts) {
@@ -555,7 +622,7 @@ const Store = (() => {
 
 const urlCache = new Map();
 async function putBlob(blob) { const id = uid('b'); await Store.put('blobs', blob, id); return id; }
-async function blobURL(id) { if (!id) return null; if (urlCache.has(id)) return urlCache.get(id); const b = await Store.get('blobs', id); if (!b) return null; const u = URL.createObjectURL(b); urlCache.set(id, u); return u; }
+async function blobURL(id) { if (!id) return null; if (urlCache.has(id)) return urlCache.get(id); let b = await Store.get('blobs', id); if (!b) b = await Sync.fetchBlob(id); if (!b) return null; const u = URL.createObjectURL(b); urlCache.set(id, u); return u; }
 async function hydrate(root) { await Promise.all($$('[data-blob]', root).map(async e => { const u = await blobURL(e.dataset.blob); if (u && e.getAttribute('src') !== u) e.src = u; })); }
 function cleanHTML(node) { const c = node.cloneNode(true); $$('[data-blob]', c).forEach(x => x.removeAttribute('src')); return c.innerHTML; }
 
@@ -568,7 +635,7 @@ const DEFAULT_PALETTE = [
 const S = {
   notes: new Map(), cur: null, curNew: false, force: false,
   settings: { palette: DEFAULT_PALETTE.map(x => ({ ...x })), newSync: true, lang: 'it', lastBook: '', books: [], orbitMode: 'Argomento' },
-  filter: { q: '', label: null, kind: null, color: null }, savedRange: null
+  filter: { q: '', label: null, kind: null, color: null }, savedRange: null, sel: new Set(), lastSel: null
 };
 async function saveSettings() { try { await Store.put('meta', S.settings, 'settings'); } catch (e) { } }
 
@@ -690,7 +757,7 @@ function titleOf(n) {
   const k = n.kinds || {}; return k.image ? 'Immagine' : k.audio ? 'Nota vocale' : k.video ? 'Video' : k.loc ? 'Posizione' : k.link ? 'Link' : 'Nota vuota';
 }
 function isEmptyNote(n) { return !n.title && !(n.text || '').trim() && !Object.keys(n.kinds || {}).length; }
-async function persist(n) { S.notes.set(n.id, n); await Store.put('notes', n); }
+async function persist(n, o = {}) { S.notes.set(n.id, n); await Store.put('notes', n); if (!o.remote && n.sync) Sync.markDirty(n.id); }
 
 /* ---------------------------------------------------------------- bacheca */
 const board = $('#board');
@@ -732,16 +799,31 @@ function cardHTML(n) {
   if (!n.title && !rest && !q && !list && !img) inner += `<p style="color:var(--muted)">${esc(titleOf(n))}</p>`;
   const k = n.kinds || {}; const icons = [];
   if (k.audio) icons.push(ic('mic', 'ic s')); if (k.video) icons.push(ic('video', 'ic s')); if (k.loc) icons.push(ic('pin', 'ic s')); if (k.link) icons.push(ic('link', 'ic s'));
-  if (n.links.length) icons.push(`${ic('nodes', 'ic s')}${n.links.length}`);
+  const nl = n.links.filter(id => S.notes.has(id)).length; if (nl) icons.push(`${ic('nodes', 'ic s')}${nl}`);
   const labels = effLabels(n).slice(0, 3).join(' · ');
   if (labels || icons.length) inner += `<div class="meta"><span class="labels">${esc(labels)}</span><span class="icons">${icons.join('')}</span></div>`;
-  return `<button class="card ${a.cls}${n.pinned ? ' pinned' : ''}" data-id="${esc(n.id)}" style="--nbg:${a.bg}" aria-label="${esc(titleOf(n))}">${inner}</button>`;
+  return `<button class="card ${a.cls}${n.pinned ? ' pinned' : ''}${S.sel.has(n.id) ? ' sel' : ''}" data-id="${esc(n.id)}" style="--nbg:${a.bg}" aria-label="${esc(titleOf(n))}"><span class="tick" aria-hidden="true">${ic('check')}</span>${inner}</button>`;
 }
+let firstRender = true;
 function renderBoard() {
   const all = [...S.notes.values()];
   const list = all.filter(matches).sort((a, b) => (b.pinned - a.pinned) || (b.updatedAt - a.updatedAt));
+  for (const id of [...S.sel]) if (!S.notes.has(id)) S.sel.delete(id);
+  const animate = !REDUCED && (E.root.hidden || WIDE());
+  const before = new Map();
+  if (animate && !firstRender) for (const c of board.children) before.set(c.dataset.id, c.getBoundingClientRect());
   board.innerHTML = list.map(cardHTML).join('');
   hydrate(board);
+  if (animate) {
+    const H = innerHeight; let i = 0;
+    for (const c of board.children) {
+      const r = c.getBoundingClientRect(), o = before.get(c.dataset.id);
+      const onScreen = (q) => q && q.bottom > -40 && q.top < H + 40;
+      if (o) { const dx = o.left - r.left, dy = o.top - r.top; if ((dx || dy) && (onScreen(o) || onScreen(r))) c.animate([{ transform: `translate(${dx}px,${dy}px)` }, { transform: 'none' }], { duration: 340, easing: EASE }); }
+      else if (onScreen(r)) c.animate([{ opacity: 0, transform: 'translateY(12px) scale(.97)' }, { opacity: 1, transform: 'none' }], { duration: 300, easing: EASE, delay: firstRender ? Math.min(i++, 14) * 28 : 40, fill: 'backwards' });
+    }
+  }
+  firstRender = false;
   const f = S.filter, chips = [];
   if (f.label) chips.push(['label', '#' + f.label]); if (f.kind) chips.push(['kind', KIND_NAMES[f.kind]]); if (f.color) chips.push(['color', 'colore']);
   $('#activeFilter').innerHTML = chips.map(([k, l]) => `<button class="fchip" data-clear="${k}">${esc(l)}${ic('close', 'ic s')}</button>`).join('');
@@ -749,61 +831,205 @@ function renderBoard() {
   const empty = $('#empty');
   if (!list.length) { empty.hidden = false; empty.innerHTML = all.length ? '<b>Nessuna nota corrisponde</b>Prova un\'altra parola o togli il filtro.' : '<b>Ancora nessuna nota</b>Tocca «Scrivi una nota…» qui sotto: si parte sempre dal testo, il resto si inserisce dove si trova il cursore.'; }
   else empty.hidden = true;
+  updateSelBar();
 }
 $('#activeFilter').addEventListener('click', e => { const b = e.target.closest('[data-clear]'); if (!b) return; S.filter[b.dataset.clear] = null; renderBoard(); });
 $('#q').addEventListener('input', e => { S.filter.q = e.target.value; queueBoard(); });
 
-// tocco, pressione lunga (colore rapido), tasto destro
+/* tocco = apri; pressione lunga, tasto destro o Ctrl+clic = seleziona */
 let lp = null;
 board.addEventListener('pointerdown', e => {
-  const c = e.target.closest('.card'); if (!c) return;
-  lp = { id: c.dataset.id, x: e.clientX, y: e.clientY, fired: false, t: setTimeout(() => { lp.fired = true; quickColor(c); }, 480) };
+  const c = e.target.closest('.card'); if (!c || e.button > 0) return;
+  lp = { id: c.dataset.id, x: e.clientX, y: e.clientY, fired: false, t: setTimeout(() => { lp.fired = true; try { navigator.vibrate?.(12); } catch (x) { } toggleSel(c.dataset.id); }, 450) };
 });
 board.addEventListener('pointermove', e => { if (lp && Math.hypot(e.clientX - lp.x, e.clientY - lp.y) > 10) { clearTimeout(lp.t); } });
 ['pointerup', 'pointercancel', 'pointerleave'].forEach(t => board.addEventListener(t, () => { if (lp) clearTimeout(lp.t); }));
-board.addEventListener('click', e => { const c = e.target.closest('.card'); if (!c) return; if (lp && lp.fired) { lp = null; return; } lp = null; openNote(c.dataset.id); });
-board.addEventListener('contextmenu', e => { const c = e.target.closest('.card'); if (!c) return; e.preventDefault(); if (lp && lp.fired) return; if (lp) { clearTimeout(lp.t); lp.fired = true; } quickColor(c); });
+board.addEventListener('click', e => {
+  const c = e.target.closest('.card'); if (!c) return;
+  if (lp && lp.fired) { lp = null; return; } lp = null;
+  if (S.sel.size || e.ctrlKey || e.metaKey) return toggleSel(c.dataset.id);
+  if (e.shiftKey && S.lastSel) {
+    const ids = [...board.children].map(x => x.dataset.id), a = ids.indexOf(S.lastSel), b = ids.indexOf(c.dataset.id);
+    if (a >= 0 && b >= 0) { ids.slice(Math.min(a, b), Math.max(a, b) + 1).forEach(id => S.sel.add(id)); return updateSelBar(true); }
+  }
+  openNote(c.dataset.id, { from: c });
+});
+board.addEventListener('contextmenu', e => { const c = e.target.closest('.card'); if (!c) return; e.preventDefault(); if (lp && lp.fired) return; if (lp) { clearTimeout(lp.t); lp.fired = true; } toggleSel(c.dataset.id); });
 
-function quickColor(card) {
-  const n = S.notes.get(card.dataset.id); if (!n) return;
+/* ---------------------------------------------------------------- selezione multipla */
+const SB = $('#selbar');
+function toggleSel(id) {
+  const was = S.sel.size;
+  if (S.sel.has(id)) S.sel.delete(id); else { S.sel.add(id); S.lastSel = id; }
+  if (!was && S.sel.size && !IN_FRAME) { try { history.pushState({ sel: 1 }, ''); } catch (e) { } }
+  updateSelBar(true);
+}
+function clearSel(fromPop) {
+  if (!S.sel.size) return;
+  S.sel.clear(); hidePop(); updateSelBar(true);
+  if (!IN_FRAME && !fromPop && history.state?.sel) { try { history.back(); } catch (e) { } }
+}
+function updateSelBar(pulse) {
+  const k = S.sel.size, on = k > 0;
+  for (const c of board.children) { const s = S.sel.has(c.dataset.id); c.classList.toggle('sel', s); c.setAttribute('aria-pressed', on ? String(s) : 'false'); }
+  document.body.classList.toggle('selecting', on);
+  if (on) {
+    $('#selCount').textContent = String(k); $('#selCount').setAttribute('aria-label', k === 1 ? '1 nota selezionata' : `${k} note selezionate`);
+    const allPinned = [...S.sel].every(id => S.notes.get(id)?.pinned);
+    $('#selPin').setAttribute('aria-label', allPinned ? 'Togli da in alto' : 'Fissa in alto');
+    $('#selPin').classList.toggle('on', allPinned);
+    if (SB.hidden || SB._closing) show(SB, [{ translate: '0 -100%' }, { translate: '0 0' }], { duration: 260 });
+    else if (pulse) anim($('#selCount'), [{ transform: 'translateY(-4px)', opacity: .4 }, { transform: 'none', opacity: 1 }], { duration: 180 });
+  } else if (!SB.hidden && !SB._closing) hide(SB, [{ translate: '0 0' }, { translate: '0 -100%' }], { duration: 200 });
+}
+const selNotes = () => [...S.sel].map(id => S.notes.get(id)).filter(Boolean);
+$('#selClose').addEventListener('click', () => clearSel());
+$('#selAll').addEventListener('click', () => { for (const c of board.children) S.sel.add(c.dataset.id); updateSelBar(true); });
+$('#selPin').addEventListener('click', async () => {
+  const ns = selNotes(), pin = !ns.every(n => n.pinned);
+  for (const n of ns) { n.pinned = pin; await persist(n); }
+  clearSel(); renderBoard(); toast(pin ? (ns.length === 1 ? 'Nota fissata in alto' : `${ns.length} note fissate in alto`) : 'Tolte da in alto');
+});
+$('#selColor').addEventListener('click', e => {
+  const ns = selNotes(); const cur = ns.length && ns.every(n => colorKey(n.color) === colorKey(ns[0].color)) ? colorKey(ns[0].color) : null;
+  palettePop(e.currentTarget, cur, async c => { for (const n of ns) { n.color = { ...c }; await persist(n); } clearSel(); renderBoard(); });
+});
+$('#selShare').addEventListener('click', () => shareNotes(selNotes()));
+$('#selDelete').addEventListener('click', async () => {
+  const ids = [...S.sel], cards = ids.map(id => board.querySelector(`.card[data-id="${CSS.escape(id)}"]`)).filter(Boolean);
+  await Promise.all(cards.map(c => anim(c, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'scale(.9)' }], { duration: 200, easing: EASE_IN, fill: 'forwards' })));
+  S.sel.clear(); if (!IN_FRAME && history.state?.sel) { try { history.back(); } catch (e) { } }
+  await deleteMany(ids);
+});
+
+async function deleteMany(ids) {
+  const set = new Set(ids), notes = ids.map(id => S.notes.get(id)).filter(Boolean); if (!notes.length) return;
+  const versions = []; for (const n of notes) versions.push(...await Store.versions(n.id));
+  const linkBackup = new Map();
+  for (const m of S.notes.values()) if (!set.has(m.id) && m.links.some(x => set.has(x))) { linkBackup.set(m.id, [...m.links]); m.links = m.links.filter(x => !set.has(x)); await persist(m); }
+  for (const v of versions) await Store.del('versions', v.id);
+  for (const n of notes) { S.notes.delete(n.id); await Store.del('notes', n.id); }
+  Sync.tomb(notes.filter(n => n.sync).map(n => n.id), 'del', 8000);
+  renderBoard(); if (!$('#orbit').hidden) buildOrbit(true);
+  toast(notes.length === 1 ? 'Nota eliminata' : `${notes.length} note eliminate`, 7000, {
+    label: 'Annulla', fn: async () => {
+      Sync.untomb(notes.map(n => n.id)); for (const n of notes) await persist(n);
+      for (const v of versions) await Store.put('versions', v);
+      for (const [id, links] of linkBackup) { const m = S.notes.get(id); if (m) { m.links = links; await persist(m); } }
+      renderBoard(); if (!$('#orbit').hidden) buildOrbit(true); toast('Ripristinate');
+    }
+  });
+}
+
+async function shareNotes(ns) {
+  if (!ns.length) return;
+  const text = ns.map(toMarkdown).join('\n\n---\n\n');
+  const title = ns.length === 1 ? titleOf(ns[0]) : `${ns.length} note`;
+  if (!IN_FRAME && navigator.share) {
+    const data = { title, text };
+    try {
+      if (navigator.canShare) {
+        const files = [];
+        for (const n of ns) {
+          const t = document.createElement('template'); t.innerHTML = n.html || '';
+          for (const f of $$('figure[data-type=image]', t.content)) {
+            if (files.length >= 10) break; const b = await Store.get('blobs', f.dataset.src);
+            if (b) files.push(new File([b], `immagine-${files.length + 1}.${(b.type.split('/')[1] || 'jpg').replace('jpeg', 'jpg')}`, { type: b.type || 'image/jpeg' }));
+          }
+        }
+        if (files.length && navigator.canShare({ files })) data.files = files;
+      }
+      await navigator.share(data); clearSel(); return;
+    } catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  try { await navigator.clipboard.writeText(text); toast(ns.length === 1 ? 'Nota copiata come testo: incollala dove vuoi' : `${ns.length} note copiate come testo`); clearSel(); return; } catch (e) { }
+  openSheet(`<h2>Condividi</h2><p class="note">Qui la condivisione diretta non è disponibile: seleziona il testo e copialo.</p><label class="field"><span class="vh">Testo da copiare</span><textarea readonly style="font-family:var(--f-mono); font-style:normal; min-height:220px">${esc(text)}</textarea></label>`);
+}
+
+function palettePop(anchor, curKey, apply) {
   const pop = $('#pop');
-  pop.innerHTML = S.settings.palette.map((p, i) => `<button class="sw" data-i="${i}" aria-label="${esc(p.name || 'Colore')}" aria-pressed="${colorKey(p) === colorKey(n.color)}" style="background:${swatchBg(p)}"></button>`).join('');
-  pop.hidden = false;
-  const r = card.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight;
+  pop.innerHTML = S.settings.palette.map((p, i) => `<button class="sw" data-i="${i}" aria-label="${esc(p.name || 'Colore')}" aria-pressed="${colorKey(p) === curKey}" style="background:${swatchBg(p)}"></button>`).join('');
+  show(pop, [{ opacity: 0, transform: 'translateY(-6px) scale(.94)' }, { opacity: 1, transform: 'none' }], { duration: 200 });
+  const r = anchor.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight;
   pop.style.left = Math.max(12, Math.min(innerWidth - pw - 12, r.left + r.width / 2 - pw / 2)) + 'px';
   pop.style.top = Math.max(12, r.top - ph - 8 < 60 ? r.bottom + 8 : r.top - ph - 8) + 'px';
-  pop.onclick = async ev => { const b = ev.target.closest('.sw'); if (!b) return; n.color = { ...S.settings.palette[+b.dataset.i] }; await persist(n); hidePop(); renderBoard(); };
+  pop.onclick = async ev => { const b = ev.target.closest('.sw'); if (!b) return; hidePop(); await apply(S.settings.palette[+b.dataset.i]); };
+  document.removeEventListener('pointerdown', outsidePop);
   setTimeout(() => document.addEventListener('pointerdown', outsidePop, { once: true }), 0);
 }
 function outsidePop(e) { if (!$('#pop').contains(e.target)) hidePop(); else document.addEventListener('pointerdown', outsidePop, { once: true }); }
-function hidePop() { $('#pop').hidden = true; }
+function hidePop() { const p = $('#pop'); if (!p.hidden && !p._closing) hide(p, [{ opacity: 1 }, { opacity: 0, transform: 'scale(.96)' }], { duration: 140 }); }
 
 /* ---------------------------------------------------------------- fogli */
 let sheetOnClose = null;
 function openSheet(html, onClose) {
-  const sh = $('#sheet'); sh.onclick = sh.oninput = sh.onchange = sh.onkeydown = null; sh.innerHTML = '<span class="grab"></span>' + html; sh.hidden = false; $('#scrim').hidden = false; sh.scrollTop = 0; sheetOnClose = onClose || null;
+  const sh = $('#sheet'), wasOpen = !sh.hidden && !sh._closing;
+  sh.onclick = sh.oninput = sh.onchange = sh.onkeydown = null; sh.innerHTML = '<span class="grab"></span>' + html; sh.scrollTop = 0; sheetOnClose = onClose || null;
+  if (wasOpen) anim(sh, [{ opacity: .3 }, { opacity: 1 }], { duration: 180 });
+  else { show(sh, [{ translate: '0 100%' }, { translate: '0 0' }], { duration: 300 }); show($('#scrim'), [{ opacity: 0 }, { opacity: 1 }], { duration: 220 }); }
   return sh;
 }
-function closeSheet() { $('#sheet').hidden = true; $('#scrim').hidden = true; const f = sheetOnClose; sheetOnClose = null; if (f) f(); }
+function closeSheet() {
+  const sh = $('#sheet'); if (sh.hidden || sh._closing) return;
+  hide(sh, [{ translate: '0 0' }, { translate: '0 100%' }], { duration: 200 }); hide($('#scrim'), [{ opacity: 1 }, { opacity: 0 }], { duration: 200 });
+  const f = sheetOnClose; sheetOnClose = null; if (f) f();
+}
 $('#scrim').addEventListener('click', closeSheet);
+const isOpen = el => !el.hidden && !el._closing;
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
-  if (!$('#sheet').hidden) return closeSheet();
-  if (!$('#viewer').hidden) return closeViewer();
-  if (!$('#crop').hidden) return cropCancel();
-  if (!$('#mapv').hidden) return ($('#mapv').hidden = true);
-  if (!$('#hist').hidden) return ($('#hist').hidden = true);
+  if (isOpen($('#pop'))) return hidePop();
+  if (isOpen($('#sheet'))) return closeSheet();
+  if (isOpen($('#viewer'))) return closeViewer();
+  if (isOpen($('#crop'))) return cropCancel();
+  if (isOpen($('#mapv'))) return hideFull($('#mapv'));
+  if (isOpen($('#hist'))) return hideFull($('#hist'));
   if (!E.root.hidden) return closeNote();
-  if (!$('#orbit').hidden) return closeOrbit();
+  if (S.sel.size) return clearSel();
+  if (isOpen($('#orbit'))) return closeOrbit();
 });
 
 /* ---------------------------------------------------------------- editor */
-const E = { root: $('#editor'), body: $('#edBody'), title: $('#edTitle'), meta: $('#edMeta'), status: $('#edStatus'), slot: $('.ph-slot') };
+const E = { root: $('#editor'), body: $('#edBody'), title: $('#edTitle'), meta: $('#edMeta'), status: $('#edStatus'), slot: $('.ph-slot'), tok: null };
 try { document.execCommand('defaultParagraphSeparator', false, 'div'); } catch (e) { }
+
+function rectClip(r, rad = 14) { const W = innerWidth, H = innerHeight; return `inset(${Math.max(0, r.top)}px ${Math.max(0, W - r.right)}px ${Math.max(0, H - r.bottom)}px ${Math.max(0, r.left)}px round ${rad}px)`; }
+function edIn(from, switching) {
+  E.root.getAnimations().forEach(a => a.cancel());
+  if (REDUCED) return;
+  if (switching) return anim($('.ed-inner'), [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 220 });
+  if (WIDE()) return anim(E.root, [{ opacity: 0, translate: '40px 0' }, { opacity: 1, translate: '0 0' }], { duration: 280 });
+  if (from) {
+    const r = from.getBoundingClientRect();
+    anim(E.root, [{ clipPath: rectClip(r) }, { clipPath: 'inset(0px 0px 0px 0px round 0px)' }], { duration: 380, easing: 'cubic-bezier(.2,.9,.25,1)' });
+    anim($('.ed-inner'), [{ opacity: .2, transform: `translateY(${Math.max(-60, Math.min(60, r.top - 60))}px)` }, { opacity: 1, transform: 'none' }], { duration: 380, easing: EASE });
+    anim($('.ed-tools'), [{ translate: '0 100%' }, { translate: '0 0' }], { duration: 340, easing: EASE, delay: 60, fill: 'backwards' });
+    return;
+  }
+  anim(E.root, [{ opacity: 0, translate: '0 28px' }, { opacity: 1, translate: '0 0' }], { duration: 260 });
+}
+function edOut(card) {
+  if (REDUCED) return Promise.resolve();
+  const o = { fill: 'forwards', easing: EASE_IN };
+  if (WIDE()) return anim(E.root, [{ opacity: 1, translate: '0 0' }, { opacity: 0, translate: '40px 0' }], { ...o, duration: 200 });
+  if (card) {
+    const r = card.getBoundingClientRect();
+    if (r.bottom > 0 && r.top < innerHeight) {
+      anim($('.ed-inner'), [{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: 'forwards' });
+      anim($('.ed-tools'), [{ translate: '0 0' }, { translate: '0 100%' }], { duration: 200, fill: 'forwards', easing: EASE_IN });
+      return anim(E.root, [{ clipPath: 'inset(0px 0px 0px 0px round 0px)' }, { clipPath: rectClip(r) }], { duration: 320, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' });
+    }
+  }
+  return anim(E.root, [{ opacity: 1, translate: '0 0' }, { opacity: 0, translate: '0 28px' }], { ...o, duration: 200 });
+}
+function resetEd() { E.root.getAnimations().forEach(a => a.cancel()); for (const x of [$('.ed-inner'), $('.ed-tools')]) x.getAnimations().forEach(a => a.cancel()); }
 
 async function openNote(id, opts = {}) {
   if (S.cur) await saveCurrent();
   const n = id ? S.notes.get(id) : newNote(); if (!n) return;
+  const switching = !E.root.hidden && !E.root._closing && !!S.cur;
+  if (S.sel.size) clearSel();
+  E.tok = {}; E.root._closing = false; resetEd();
   S.cur = n; S.curNew = !id;
   E.title.value = n.title; E.body.innerHTML = n.html || '';
   for (const f of $$('figure.blk', E.body)) f.setAttribute('contenteditable', 'false');
@@ -812,21 +1038,29 @@ async function openNote(id, opts = {}) {
   applyColor(E.root, n.color, E.slot); setLang();
   E.root.hidden = false; document.body.classList.add('editing');
   $('#edScroll').scrollTop = 0; updateEmpty(); renderMeta(); renderStatus();
-  if (!IN_FRAME && !opts.noHistory) { try { history.pushState({ ed: 1 }, ''); } catch (e) { } }
+  edIn(opts.from, switching);
+  if (!IN_FRAME && !opts.noHistory && !switching) { try { history.pushState({ ed: 1 }, ''); } catch (e) { } }
   if (!id) { placeCaretEnd(E.body); }
   if (opts.insert) doInsert(opts.insert);
 }
 async function closeNote(fromPop) {
-  if (!S.cur) { E.root.hidden = true; return; }
+  if (!S.cur || E.root._closing) return;
+  const tok = E.tok = {}; E.root._closing = true;
   if (rec) stopRec(true);
   await saveCurrent();
   const n = S.cur;
   if (isEmptyNote(n) && S.notes.has(n.id)) { S.notes.delete(n.id); await Store.del('notes', n.id); }
-  S.cur = null; E.root.hidden = true; document.body.classList.remove('editing'); E.body.innerHTML = '';
-  renderBoard(); if (!$('#orbit').hidden) buildOrbit(true);
+  S.cur = null; document.body.classList.remove('editing');
   if (!IN_FRAME && !fromPop && history.state?.ed) { try { history.back(); } catch (e) { } }
+  renderBoard(); if (!$('#orbit').hidden) buildOrbit(true);
+  const card = S.notes.has(n.id) ? board.querySelector(`.card[data-id="${CSS.escape(n.id)}"]`) : null;
+  await edOut(card);
+  if (E.tok !== tok) return;
+  E.root.hidden = true; E.root._closing = false; resetEd(); E.body.innerHTML = '';
+  Sync.soon(800);
+  if (card && !REDUCED) card.animate([{ filter: 'brightness(.94)' }, { filter: 'none' }], { duration: 300 });
 }
-window.addEventListener('popstate', () => { if (!E.root.hidden) closeNote(true); });
+window.addEventListener('popstate', () => { if (!E.root.hidden && !E.root._closing) return closeNote(true); if (S.sel.size) clearSel(true); });
 $('#edBack').addEventListener('click', () => closeNote());
 
 function setLang() { const l = S.settings.lang || 'it'; E.body.lang = l; E.title.lang = l; }
@@ -848,12 +1082,12 @@ function insertBlock(node) {
       const atEnd = (() => { const t = document.createRange(); t.selectNodeContents(line); t.setStart(r.endContainer, r.endOffset); return !t.toString().length; })();
       const emptyLine = !line.textContent.trim() && !$('figure,img', line);
       r = document.createRange();
-      if (emptyLine) { line.replaceWith(node); node.after(newLine()); placeCaretIn(node.nextSibling); finishInsert(); return; }
+      if (emptyLine) { line.replaceWith(node); popIn(node); node.after(newLine()); placeCaretIn(node.nextSibling); finishInsert(); return; }
       if (atEnd) r.setStartAfter(line); else r.setStartBefore(line);
       r.collapse(true);
     }
   }
-  r.insertNode(node);
+  r.insertNode(node); popIn(node);
   let after = node.nextSibling;
   if (!after || after.nodeType !== 1 || after.matches('figure')) { after = newLine(); node.after(after); }
   placeCaretIn(after); finishInsert();
@@ -861,6 +1095,7 @@ function insertBlock(node) {
 function newLine() { const d = document.createElement('div'); d.innerHTML = '<br>'; return d; }
 function placeCaretIn(n) { const r = document.createRange(); r.selectNodeContents(n); r.collapse(true); const s = getSelection(); s.removeAllRanges(); s.addRange(r); S.savedRange = r.cloneRange(); }
 function finishInsert() { hydrate(E.body); updateEmpty(); scheduleSave(); }
+function popIn(node) { anim(node, [{ opacity: 0, transform: 'translateY(8px) scale(.98)' }, { opacity: 1, transform: 'none' }], { duration: 280 }); }
 
 E.body.addEventListener('input', () => { updateEmpty(); scheduleSave(); });
 E.title.addEventListener('input', scheduleSave);
@@ -1084,7 +1319,7 @@ async function openCrop(blob, mode, preset = {}) {
   $('#cropTitle').textContent = mode === 'book' ? 'Pagina di libro · seleziona il passo' : preset.edit ? 'Modifica ritaglio' : 'Ritaglia immagine';
   $('#cropGo').textContent = mode === 'book' ? 'Estrai testo' : preset.edit ? 'Salva' : 'Inserisci';
   $('#cropFine').value = 0; $('#cropDeg').textContent = '0°';
-  $('#ocrPanel').hidden = true; $('#cropCtrl').hidden = false; $('#crop').hidden = false;
+  $('#ocrPanel').hidden = true; $('#cropCtrl').hidden = false; showFull($('#crop'));
   requestAnimationFrame(() => { cropLayout(); cropDraw(); });
   return new Promise(res => { C.res = res; });
 }
@@ -1132,8 +1367,8 @@ $('#cropRot90').addEventListener('click', () => { C.base = (C.base + 90) % 360; 
 $('#cropFull').addEventListener('click', () => { C.r = { x: 0, y: 0, w: 1, h: 1 }; cropDraw(); });
 $('#cropClose').addEventListener('click', () => cropCancel());
 window.addEventListener('resize', () => { if (!$('#crop').hidden) { cropLayout(); cropDraw(); } if (!$('#orbit').hidden) orbResize(); if (!$('#mapv').hidden) renderMap(); });
-function cropCancel() { $('#crop').hidden = true; const r = C.res; C.res = null; C.src = null; if (r) r(null); }
-function cropFinish(v) { $('#crop').hidden = true; const r = C.res; C.res = null; C.src = null; if (r) r(v); }
+function cropCancel() { hideFull($('#crop')); const r = C.res; C.res = null; C.src = null; if (r) r(null); }
+function cropFinish(v) { hideFull($('#crop')); const r = C.res; C.res = null; C.src = null; if (r) r(v); }
 function renderRotated() {
   const g = cgeo(), k = Math.min(1, 2400 / Math.max(g.W, g.H));
   const out = document.createElement('canvas'); out.width = Math.round(g.W * k); out.height = Math.round(g.H * k);
@@ -1165,7 +1400,7 @@ function preOcr(src) {
 }
 function cleanOcr(t) { return t.replace(/-\n+(?=\p{Ll})/gu, '').replace(/([^\n.!?:;»”"])\n{2,}(?=\p{Ll})/gu, '$1\n').replace(/([^\n])\n(?!\n)/g, '$1 ').replace(/[ \t]+/g, ' ').replace(/\n{2,}/g, '\n\n').replace(/^[«"“\s]+|[»"”\s]+$/g, '').trim(); }
 async function runOcr(region) {
-  $('#cropCtrl').hidden = true; $('#ocrPanel').hidden = false;
+  $('#cropCtrl').hidden = true; show($('#ocrPanel'), [{ translate: '0 100%' }, { translate: '0 0' }], { duration: 320 });
   const st = $('#ocrSt'), ta = $('#ocrText'); ta.value = ''; ta.disabled = true; st.textContent = 'Preparo il riconoscimento…';
   $('#ocrBook').value = S.settings.lastBook || ''; $('#ocrPage').value = '';
   $('#bookList').innerHTML = (S.settings.books || []).map(b => `<option value="${esc(b)}">`).join('');
@@ -1202,7 +1437,7 @@ async function openViewer(fig, quote) {
   try { V.pins = JSON.parse(fig.dataset.pins || '[]'); } catch (e) { V.pins = []; }
   $('#vwImg').src = await blobURL(fig.dataset.src) || '';
   $('#vwTitle').textContent = quote ? 'Pagina intera' : 'Immagine intera';
-  $('#viewer').hidden = false; renderViewer();
+  showFull($('#viewer')); renderViewer();
 }
 function renderViewer() {
   const w = $('#vwWrap'); $$('.pin', w).forEach(p => p.remove());
@@ -1235,7 +1470,7 @@ $('#vwCtrl').addEventListener('click', async e => {
     fig.dataset.crop = res.crop.map(v => +v.toFixed(4)).join(','); renderImageFig(fig); scheduleSave();
   }
 });
-function closeViewer() { $('#viewer').hidden = true; V.fig = null; }
+function closeViewer() { hideFull($('#viewer')); V.fig = null; }
 $('#vwClose').addEventListener('click', closeViewer);
 
 /* ---------------------------------------------------------------- mappa */
@@ -1244,7 +1479,7 @@ function openMap(fig) {
   Object.assign(M, { lat: +fig.dataset.lat, lon: +fig.dataset.lon, z: 16, dx: 0, dy: 0 });
   $('#mapTitle').textContent = fig.dataset.name || 'Posizione';
   $('#mapInfo').innerHTML = `<small>${M.lat.toFixed(6)}, ${M.lon.toFixed(6)} · ±${fig.dataset.acc} m · ${new Date(+fig.dataset.t).toLocaleString('it-IT')}</small><a href="https://www.openstreetmap.org/?mlat=${M.lat}&mlon=${M.lon}#map=17/${M.lat}/${M.lon}" target="_blank" rel="noopener noreferrer">Apri in OpenStreetMap</a>`;
-  $('#mapv').hidden = false; requestAnimationFrame(renderMap);
+  showFull($('#mapv')); requestAnimationFrame(renderMap);
 }
 function renderMap() {
   const st = $('#mapStage'), W = st.clientWidth, H = st.clientHeight, n = 2 ** M.z, t = tileXY(M.lat, M.lon, M.z);
@@ -1262,7 +1497,7 @@ $('#mapStage').addEventListener('pointermove', e => { if (!M.drag) return; M.dx 
 ['pointerup', 'pointercancel'].forEach(t => $('#mapStage').addEventListener(t, () => { M.drag = null; }));
 $('#mapIn').addEventListener('click', () => { if (M.z < 19) { M.z++; M.dx *= 2; M.dy *= 2; renderMap(); } });
 $('#mapOut').addEventListener('click', () => { if (M.z > 3) { M.z--; M.dx /= 2; M.dy /= 2; renderMap(); } });
-$('#mapClose').addEventListener('click', () => { $('#mapv').hidden = true; });
+$('#mapClose').addEventListener('click', () => hideFull($('#mapv')));
 
 /* ---------------------------------------------------------------- colore della nota */
 $('#edColor').addEventListener('click', () => openColorSheet('Tinta'));
@@ -1333,16 +1568,17 @@ function openColorSheet(tab) {
 /* ---------------------------------------------------------------- menu nota */
 $('#edMore').addEventListener('click', () => {
   const n = S.cur;
-  const sh = openSheet(`<div class="menu-item" style="cursor:default"><svg class="ic"><use href="#i-cloud"/></svg><span class="grow"><span>Sincronizza questa nota</span><small>${n.sync ? 'Andrà su Drive, cifrata, quando la sincronizzazione sarà attiva' : 'Resta solo su questo dispositivo'}</small></span><button class="switch" role="switch" aria-checked="${n.sync}" aria-label="Sincronizza questa nota" data-a="sync"></button></div>
+  const sh = openSheet(`<div class="menu-item" style="cursor:default"><svg class="ic"><use href="#i-cloud"/></svg><span class="grow"><span>Sincronizza questa nota</span><small>${!n.sync ? 'Resta solo su questo dispositivo' : Sync.st.on ? 'Copia cifrata su Drive, visibile agli altri tuoi dispositivi' : 'Andrà su Drive, cifrata, quando attiverai la sincronizzazione'}</small></span><button class="switch" role="switch" aria-checked="${n.sync}" aria-label="Sincronizza questa nota" data-a="sync"></button></div>
     <button class="menu-item" data-a="pin">${ic('pinup')}<span class="grow"><span>${n.pinned ? 'Togli da in alto' : 'Fissa in alto'}</span></span></button>
     <button class="menu-item" data-a="hist">${ic('history')}<span class="grow"><span>Cronologia versioni</span></span></button>
-    <button class="menu-item" data-a="md">${ic('copy')}<span class="grow"><span>Copia come Markdown</span></span></button>
+    <button class="menu-item" data-a="share">${ic('share')}<span class="grow"><span>Condividi</span><small>Su telefono apre le app; altrimenti copia il testo</small></span></button>
     <button class="menu-item danger" data-a="del">${ic('trash')}<span class="grow"><span>Elimina nota</span></span></button><div id="delBox"></div>`);
   sh.onclick = async e => {
     const a = e.target.closest('[data-a]')?.dataset.a; if (!a) return;
-    if (a === 'sync') { n.sync = !n.sync; S.force = true; await saveCurrent(); closeSheet(); toast(n.sync ? 'La nota verrà sincronizzata' : 'La nota resta solo su questo dispositivo'); }
+    if (a === 'sync') { n.sync = !n.sync; S.force = true; await saveCurrent(); Sync.onFlag(n); closeSheet(); toast(n.sync ? 'La nota verrà sincronizzata' : Sync.st.on ? 'La nota resta solo qui: la copia su Drive e sugli altri dispositivi viene eliminata' : 'La nota resta solo su questo dispositivo'); }
     if (a === 'pin') { n.pinned = !n.pinned; S.force = true; await saveCurrent(); closeSheet(); }
     if (a === 'hist') { closeSheet(); openHistory(); }
+    if (a === 'share') { await saveCurrent(); closeSheet(); return shareNotes([n]); }
     if (a === 'md') { await saveCurrent(); const md = toMarkdown(n); try { await navigator.clipboard.writeText(md); toast('Copiata come Markdown'); } catch (err) { $('#delBox').innerHTML = `<label class="field">Seleziona e copia<textarea readonly style="font-family:var(--f-mono); font-style:normal">${esc(md)}</textarea></label>`; } }
     if (a === 'del') $('#delBox').innerHTML = `<p class="note">La nota e la sua cronologia vengono cancellate da questo dispositivo.</p><div class="btns"><button class="btn" data-a="nodel">Annulla</button><button class="btn primary" data-a="yesdel" style="background:var(--danger)">Elimina</button></div>`;
     if (a === 'nodel') $('#delBox').innerHTML = '';
@@ -1350,11 +1586,12 @@ $('#edMore').addEventListener('click', () => {
   };
 });
 async function deleteNote(n) {
-  for (const m of S.notes.values()) if (m.links.includes(n.id)) { m.links = m.links.filter(x => x !== n.id); await persist(m); }
-  for (const v of await Store.versions(n.id)) await Store.del('versions', v.id);
-  S.notes.delete(n.id); await Store.del('notes', n.id);
-  S.cur = null; E.root.hidden = true; document.body.classList.remove('editing'); renderBoard(); toast('Nota eliminata');
+  clearTimeout(saveT); saveT = null; S.cur = null;
+  const tok = E.tok = {}; E.root._closing = true; document.body.classList.remove('editing');
   if (!IN_FRAME && history.state?.ed) { try { history.back(); } catch (e) { } }
+  await anim(E.root, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'scale(.96)' }], { duration: 220, easing: EASE_IN, fill: 'forwards' });
+  if (E.tok === tok) { E.root.hidden = true; E.root._closing = false; resetEd(); E.body.innerHTML = ''; }
+  await deleteMany([n.id]);
 }
 function toMarkdown(n) {
   const t = document.createElement('template'); t.innerHTML = n.html || ''; const out = [];
@@ -1383,7 +1620,7 @@ function toMarkdown(n) {
 
 /* ---------------------------------------------------------------- cronologia */
 $('#edHist').addEventListener('click', () => openHistory());
-$('#histClose').addEventListener('click', () => { $('#hist').hidden = true; });
+$('#histClose').addEventListener('click', () => hideFull($('#hist')));
 function wordDiff(a, b) {
   const A = (a || '').split(/(\s+)/), B = (b || '').split(/(\s+)/);
   if (A.length * B.length > 2.5e6) return { h: `<del>${esc(a)}</del><ins>${esc(b)}</ins>`, ins: 0, del: 0 };
@@ -1398,7 +1635,7 @@ async function openHistory() {
   await saveCurrent(); const n = S.cur; if (!n) return;
   const vs = (await Store.versions(n.id)).sort((a, b) => a.at - b.at);
   $('#histTitle').textContent = 'Cronologia · ' + titleOf(n);
-  $('#hist').hidden = false;
+  showFull($('#hist'));
   if (!vs.length) { $('#histIn').innerHTML = '<p class="note">Ancora nessuna versione: comincia a scrivere.</p>'; return; }
   let sel = vs.length - 1;
   const render = () => {
@@ -1418,7 +1655,7 @@ async function openHistory() {
     if (e.target.closest('#hRestore')) {
       const v = vs[sel]; E.body.innerHTML = v.html; E.title.value = v.title || '';
       $$('figure.blk', E.body).forEach(f => f.setAttribute('contenteditable', 'false')); $$('figure[data-type=image]', E.body).forEach(renderImageFig); hydrate(E.body);
-      await saveCurrent(); $('#hist').hidden = true; toast('Versione ripristinata: la precedente resta in cronologia');
+      await saveCurrent(); hideFull($('#hist')); toast('Versione ripristinata: la precedente resta in cronologia');
     }
   };
 }
@@ -1433,8 +1670,8 @@ function groupKey(n, mode) {
   if (mode === 'Luogo') return n.place ? (n.place.name || `${n.place.lat.toFixed(2)}, ${n.place.lon.toFixed(2)}`) : 'senza luogo';
   return effLabels(n)[0] || 'senza etichetta';
 }
-function openOrbit() { $('#orbit').hidden = false; O.sel = null; renderModes(); orbResize(); buildOrbit(false); fitOrbit(); renderOSheet(); cancelAnimationFrame(O.raf); O.raf = requestAnimationFrame(orbLoop); }
-function closeOrbit() { $('#orbit').hidden = true; cancelAnimationFrame(O.raf); }
+function openOrbit() { clearSel(); show($('#orbit'), [{ opacity: 0 }, { opacity: 1 }], { duration: 320 }); O.sel = null; renderModes(); orbResize(); buildOrbit(false); fitOrbit(); renderOSheet(); cancelAnimationFrame(O.raf); O.raf = requestAnimationFrame(orbLoop); }
+async function closeOrbit() { await hide($('#orbit'), [{ opacity: 1 }, { opacity: 0 }], { duration: 220 }); if ($('#orbit').hidden) cancelAnimationFrame(O.raf); }
 $('#btnOrbit').addEventListener('click', openOrbit);
 $('#orbBack').addEventListener('click', closeOrbit);
 function renderModes() { $('#orbModes').innerHTML = MODES.map(m => `<button data-m="${m}" aria-pressed="${m === S.settings.orbitMode}">${m}</button>`).join(''); }
@@ -1542,6 +1779,7 @@ O.cv.addEventListener('pointerup', orbUp); O.cv.addEventListener('pointercancel'
 O.cv.addEventListener('wheel', e => { e.preventDefault(); const p = evPos(e), w0 = toWorld(p.x, p.y); O.cam.k = clamp(O.cam.k * Math.exp(-e.deltaY * .0015), .2, 3); const w1 = toWorld(p.x, p.y); O.cam.x += w0.x - w1.x; O.cam.y += w0.y - w1.y; }, { passive: false });
 function renderOSheet() {
   const box = $('#orbSheet'), a = O.sel && S.notes.get(O.sel);
+  anim(box, [{ opacity: .35, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 200 });
   if (!a) { box.innerHTML = `<span class="hint">${S.notes.size ? 'Tocca una nota per vederla. Trascinala su un\'altra per collegarle. Pizzica o usa la rotella per lo zoom.' : 'Nessuna nota da mostrare.'}</span>`; return; }
   const ex = (a.text || '').replace(/\s+/g, ' ').slice(0, 220);
   const linked = a.links.map(id => S.notes.get(id)).filter(Boolean);
@@ -1581,32 +1819,47 @@ $('#btnFilter').addEventListener('click', () => {
 /* ---------------------------------------------------------------- impostazioni */
 $('#btnSettings').addEventListener('click', openSettings);
 function openSettings() {
-  const local = [...S.notes.values()].filter(n => !n.sync).length;
+  const local = [...S.notes.values()].filter(n => !n.sync).length, st = Sync.st;
+  const driveSub = IN_FRAME ? 'Disponibile nella versione installata' : !CFG.googleClientId ? 'Da configurare: serve un ID client Google (vedi README)'
+    : st.on && Sync.K ? `${esc(st.email || 'Account Google')} · ${st.lastSync ? 'ultima ' + fmtTime(st.lastSync) : 'in attesa della prima sincronizzazione'}`
+    : Sync.K ? 'Sospesa: tocca per riprendere' : 'Spenta: le note restano su questo dispositivo';
   const sh = openSheet(`<h2>Impostazioni</h2>
     <h3>Sincronizzazione</h3>
-    <div class="menu-item" style="cursor:default">${ic('cloud')}<span class="grow"><span>Google Drive</span><small>Arriva nel prossimo passo, con cifratura sul dispositivo. Per ora tutto resta qui.</small></span><button class="switch" role="switch" aria-checked="false" disabled aria-label="Google Drive"></button></div>
+    <div class="menu-item" style="cursor:default">${ic('cloud')}<span class="grow"><span>Google Drive, cifrato</span><small>${driveSub}</small></span><button class="switch" role="switch" aria-checked="${st.on}" ${Sync.available() ? '' : 'disabled'} data-a="drive" aria-label="Sincronizza con Google Drive"></button></div>
+    ${st.on ? `<div class="btns" style="margin:4px 0 8px"><button class="btn sm" data-a="syncnow">Sincronizza ora</button><button class="btn sm" data-a="disconnect">Scollega da Google</button></div><div id="discBox"></div>` : ''}
     <div class="menu-item" style="cursor:default"><span style="width:22px"></span><span class="grow"><span>Nuove note sincronizzate</span><small>Se spento, ogni nota nasce solo su questo dispositivo</small></span><button class="switch" role="switch" aria-checked="${!!S.settings.newSync}" data-a="newsync" aria-label="Nuove note sincronizzate"></button></div>
-    <p class="note">${local} not${local === 1 ? 'a' : 'e'} impostat${local === 1 ? 'a' : 'e'} come «solo su questo dispositivo».</p>
+    <p class="note">${local} not${local === 1 ? 'a' : 'e'} impostat${local === 1 ? 'a' : 'e'} come «solo su questo dispositivo». Le cambi dal menu ⋮ di ogni nota.</p>
     <h3>Correttore ortografico</h3>
     <label class="field">Lingua principale delle note<select id="langSel">${[['it', 'Italiano'], ['fr', 'Français'], ['en', 'English']].map(([v, l]) => `<option value="${v}"${S.settings.lang === v ? ' selected' : ''}>${l}</option>`).join('')}</select></label>
     <p class="note">La sottolineatura degli errori la fa il correttore del sistema: su Android quello della tastiera, su Windows quello di Chrome o Edge (Impostazioni › Lingue).</p>
     <h3>Dove sono i dati</h3>
-    <p class="note">${Store.persistent ? 'Le note sono salvate in questo browser, su questo dispositivo.' : 'Questo browser non permette di salvare: le note spariranno alla chiusura. Usa la versione installata.'}${IN_FRAME ? ' Stai usando l\'anteprima: fotocamera, microfono e posizione funzionano solo nella versione installata.' : ''}</p>
+    <p class="note">${Store.persistent ? 'Le note sono salvate su questo dispositivo' + (st.on ? '; quelle sincronizzate hanno anche una copia cifrata nella cartella nascosta dell\'app sul tuo Drive.' : '.') : 'Questo browser non permette di salvare: le note spariranno alla chiusura. Usa la versione installata.'}${IN_FRAME ? ' Stai usando l\'anteprima: fotocamera, microfono, posizione e Drive funzionano solo nella versione installata.' : ''}</p>
     <details style="margin-top:12px"><summary style="cursor:pointer; color:var(--muted); font-size:14px; padding:6px 0">Avanzate</summary>
       <button class="menu-item" data-a="keep">${ic('book')}<span class="grow"><span>Importa da Google Keep</span><small>Archivio di Google Takeout (.zip)</small></span></button>
       <button class="menu-item" data-a="export">${ic('copy')}<span class="grow"><span>Esporta un backup</span><small>Tutte le note e gli allegati in un file .json</small></span></button>
       <button class="menu-item" data-a="import">${ic('plus')}<span class="grow"><span>Importa un backup</span><small>Da un file .json esportato prima</small></span></button>
-      <button class="menu-item danger" data-a="wipe">${ic('trash')}<span class="grow"><span>Elimina tutte le note</span></span></button><div id="wipeBox"></div>
+      ${Sync.mk ? `<button class="menu-item" data-a="code">${ic('cloud')}<span class="grow"><span>Mostra la chiave di recupero</span><small>Serve se dimentichi la frase segreta</small></span></button>` : ''}
+      ${Sync.available() ? `<button class="menu-item danger" data-a="wipedrive">${ic('cloud')}<span class="grow"><span>Elimina i dati da Drive</span><small>Le note restano sui dispositivi</small></span></button><div id="wdBox"></div>` : ''}
+      <button class="menu-item danger" data-a="wipe">${ic('trash')}<span class="grow"><span>Elimina tutte le note</span><small>Da questo dispositivo</small></span></button><div id="wipeBox"></div>
     </details>`);
   sh.onclick = async e => {
-    const a = e.target.closest('[data-a]')?.dataset.a; if (!a) return;
-    if (a === 'newsync') { S.settings.newSync = !S.settings.newSync; saveSettings(); e.target.closest('[data-a]').setAttribute('aria-checked', S.settings.newSync); }
+    const el = e.target.closest('[data-a]'), a = el?.dataset.a; if (!a) return;
+    if (a === 'drive') { if (st.on) { Sync.disable(); closeSheet(); } else if (Sync.K) { Sync.activate(false); closeSheet(); } else { Sync.enable(); } }
+    if (a === 'syncnow') { closeSheet(); Sync.run(true); }
+    if (a === 'disconnect') $('#discBox').innerHTML = `<p class="note">Questo dispositivo smette di sincronizzare e dimentica la chiave. Le note restano qui; quelle su Drive restano per gli altri dispositivi.</p><div class="btns"><button class="btn" data-a="nodisc">Annulla</button><button class="btn primary" data-a="yesdisc">Scollega</button></div>`;
+    if (a === 'nodisc') $('#discBox').innerHTML = '';
+    if (a === 'yesdisc') { await Sync.disconnect(); closeSheet(); }
+    if (a === 'code') Sync.showCode(false);
+    if (a === 'wipedrive') $('#wdBox').innerHTML = `<p class="note">Cancella dal tuo Drive tutte le copie cifrate e la chiave. Le note restano sui dispositivi, ma gli altri smetteranno di ricevere aggiornamenti finché non ricolleghi tutto.</p><div class="btns"><button class="btn" data-a="nowd">Annulla</button><button class="btn primary" data-a="yeswd" style="background:var(--danger)">Elimina da Drive</button></div>`;
+    if (a === 'nowd') $('#wdBox').innerHTML = '';
+    if (a === 'yeswd') { closeSheet(); try { await Sync.wipeRemote(); } catch (x) { toast('Non riuscito: ' + x.message); } }
+    if (a === 'newsync') { S.settings.newSync = !S.settings.newSync; saveSettings(); el.setAttribute('aria-checked', S.settings.newSync); }
     if (a === 'keep') openKeepImport();
     if (a === 'export') exportBackup();
     if (a === 'import') { const i = $('#fBackup'); i.value = ''; i.click(); }
     if (a === 'wipe') $('#wipeBox').innerHTML = `<p class="note">Cancella tutte le note, gli allegati e la cronologia da questo dispositivo. Non si può annullare.</p><div class="btns"><button class="btn" data-a="nowipe">Annulla</button><button class="btn primary" data-a="yeswipe" style="background:var(--danger)">Elimina tutto</button></div>`;
     if (a === 'nowipe') $('#wipeBox').innerHTML = '';
-    if (a === 'yeswipe') { await Store.clear(); S.notes.clear(); await saveSettings(); await Store.put('meta', true, 'seeded'); closeSheet(); renderBoard(); toast('Tutte le note sono state eliminate'); }
+    if (a === 'yeswipe') { await Store.clear(); S.notes.clear(); Sync.reset(); await saveSettings(); await Store.put('meta', true, 'seeded'); closeSheet(); renderBoard(); toast('Tutte le note sono state eliminate'); }
   };
   sh.onchange = e => { if (e.target.id === 'langSel') { S.settings.lang = e.target.value; saveSettings(); setLang(); } };
 }
@@ -1715,13 +1968,413 @@ $('#qPhoto').addEventListener('click', () => { const i = $('#fCamera'); i.value 
 $('#qMic').addEventListener('click', () => openNote(null, { insert: 'audio' }));
 
 /* ---------------------------------------------------------------- avvio */
+/* ---------------------------------------------------------------- sincronizzazione cifrata (Google Drive) */
+const CFG = window.TACCUINO_CONFIG || {};
+const SCOPE = 'https://www.googleapis.com/auth/drive.appdata';
+const GAPI = 'https://www.googleapis.com';
+const te = s => new TextEncoder().encode(s), td = u => new TextDecoder().decode(u);
+const rand = n => crypto.getRandomValues(new Uint8Array(n));
+const hex = u => [...u].map(b => b.toString(16).padStart(2, '0')).join('');
+const b64 = {
+  enc(u) { let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s); },
+  dec(s) { return Uint8Array.from(atob(s), c => c.charCodeAt(0)); }
+};
+const B32 = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function b32enc(u) { let bits = 0, val = 0, out = ''; for (const b of u) { val = (val << 8) | b; bits += 8; while (bits >= 5) { out += B32[(val >>> (bits - 5)) & 31]; bits -= 5; } } if (bits) out += B32[(val << (5 - bits)) & 31]; return out; }
+function b32dec(s) {
+  s = s.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  let bits = 0, val = 0; const out = [];
+  for (const c of s) { const i = B32.indexOf(c); if (i < 0) throw new Error('carattere'); val = (val << 5) | i; bits += 5; if (bits >= 8) { out.push((val >>> (bits - 8)) & 255); bits -= 8; } }
+  return new Uint8Array(out);
+}
+const groupCode = c => c.match(/.{1,4}/g).join('-');
+async function gz(u, compress) { const st = compress ? new CompressionStream('gzip') : new DecompressionStream('gzip'); return new Uint8Array(await new Response(new Blob([u]).stream().pipeThrough(st)).arrayBuffer()); }
+
+const Crypto = {
+  async keys(mk) {
+    const base = await crypto.subtle.importKey('raw', mk, 'HKDF', false, ['deriveKey']);
+    const p = info => ({ name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(32), info: te(info) });
+    return {
+      enc: await crypto.subtle.deriveKey(p('taccuino/enc/1'), base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']),
+      mac: await crypto.subtle.deriveKey(p('taccuino/name/1'), base, { name: 'HMAC', hash: 'SHA-256', length: 256 }, false, ['sign'])
+    };
+  },
+  async kek(pass, salt, iter) {
+    const base = await crypto.subtle.importKey('raw', te(pass.normalize('NFKC')), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: iter }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  },
+  async seal(key, u, z = true) {
+    let data = u, f = 0;
+    if (z && 'CompressionStream' in window) { data = await gz(u, true); f = 1; }
+    const iv = rand(12), ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, data));
+    const out = new Uint8Array(16 + ct.length); out.set([84, 81, 49, f]); out.set(iv, 4); out.set(ct, 16); return out;
+  },
+  async open(key, u) {
+    if (u[0] !== 84 || u[1] !== 81 || u[2] !== 49) throw new Error('formato sconosciuto');
+    const pt = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: u.subarray(4, 16) }, key, u.subarray(16)));
+    return u[3] ? gz(pt, false) : pt;
+  },
+  async makeKeyring(pass, mk) {
+    const salt = rand(16), iter = 600000, kek = await this.kek(pass, salt, iter), iv = rand(12);
+    const wrapped = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, kek, mk));
+    const K = await this.keys(mk), check = await this.seal(K.enc, te('taccuino-ok'), false);
+    return { v: 1, kdf: 'PBKDF2-SHA256', iter, salt: b64.enc(salt), iv: b64.enc(iv), wrapped: b64.enc(wrapped), check: b64.enc(check) };
+  },
+  async unlock(kr, pass) {
+    const kek = await this.kek(pass, b64.dec(kr.salt), kr.iter);
+    try { return new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64.dec(kr.iv) }, kek, b64.dec(kr.wrapped))); }
+    catch (e) { throw new Error('frase'); }
+  },
+  async verify(kr, mk) { const K = await this.keys(mk); await this.open(K.enc, b64.dec(kr.check)); return K; }
+};
+
+const Drive = {
+  async req(method, url, o = {}) {
+    let r;
+    try { r = await fetch(url.startsWith('http') ? url : GAPI + url, { method, body: o.body, headers: { Authorization: 'Bearer ' + Sync.token, ...(o.headers || {}) } }); }
+    catch (e) { throw Object.assign(new Error('rete'), { net: true }); }
+    if (r.status === 401) { Sync.token = null; throw Object.assign(new Error('accesso scaduto'), { auth: true }); }
+    if (!r.ok) throw new Error('Drive ' + r.status);
+    if (o.raw) return r; return r.status === 204 ? null : r.json();
+  },
+  async list() {
+    const out = []; let pt = '';
+    do {
+      const q = new URLSearchParams({ spaces: 'appDataFolder', pageSize: '1000', fields: 'nextPageToken,files(id,name,modifiedTime,size,appProperties)' });
+      if (pt) q.set('pageToken', pt);
+      const d = await this.req('GET', '/drive/v3/files?' + q); out.push(...(d.files || [])); pt = d.nextPageToken;
+    } while (pt);
+    return out;
+  },
+  async download(id) { const r = await this.req('GET', `/drive/v3/files/${id}?alt=media`, { raw: true }); return new Uint8Array(await r.arrayBuffer()); },
+  async upload(meta, bytes, id) {
+    const F = 'fields=id,name,modifiedTime,size,appProperties', path = `/upload/drive/v3/files${id ? '/' + id : ''}`, m = id ? 'PATCH' : 'POST', md = JSON.stringify(id ? {} : meta);
+    if (bytes.length > (CFG.resumableOver || 4.5e6)) {
+      const r = await this.req(m, `${path}?uploadType=resumable&${F}`, { body: md, headers: { 'Content-Type': 'application/json; charset=UTF-8', 'X-Upload-Content-Type': 'application/octet-stream' }, raw: true });
+      const loc = r.headers.get('Location'); if (!loc) throw new Error('caricamento non avviato');
+      let r2; try { r2 = await fetch(loc, { method: 'PUT', body: bytes, headers: { 'Content-Type': 'application/octet-stream' } }); } catch (e) { throw Object.assign(new Error('rete'), { net: true }); }
+      if (!r2.ok) throw new Error('Drive ' + r2.status); return r2.json();
+    }
+    const bd = 'tq' + hex(rand(8));
+    const body = new Blob([`--${bd}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${md}\r\n--${bd}\r\nContent-Type: application/octet-stream\r\n\r\n`, bytes, `\r\n--${bd}--`]);
+    return this.req(m, `${path}?uploadType=multipart&${F}`, { body, headers: { 'Content-Type': `multipart/related; boundary=${bd}` } });
+  },
+  del(id) { return this.req('DELETE', `/drive/v3/files/${id}`); },
+  about() { return this.req('GET', '/drive/v3/about?fields=user(emailAddress,displayName)'); }
+};
+
+const SYNC_DEFAULT = () => ({ on: false, email: '', consented: false, lastSync: 0, idx: {}, dirty: [], tombs: {}, up: [] });
+const Sync = {
+  st: SYNC_DEFAULT(), K: null, mk: null, token: null, exp: 0, busy: false, again: false, timer: 0, state: 'off', err: '',
+  names: new Map(), fetching: new Map(),
+  available() { return !IN_FRAME && !!CFG.googleClientId && !!window.crypto?.subtle; },
+  ready() { return this.st.on && !!this.K && this.available(); },
+  async init() {
+    try { const s = await Store.get('meta', 'sync'); if (s) this.st = Object.assign(SYNC_DEFAULT(), s); } catch (e) { }
+    try { const mk = await Store.get('meta', 'mk'); if (mk) { this.mk = new Uint8Array(mk); this.K = await Crypto.keys(this.mk); } } catch (e) { }
+    try { const t = await Store.get('meta', 'tok'); if (t && t.exp > Date.now() + 60000) { this.token = t.t; this.exp = t.exp; } } catch (e) { }
+    if (this.available()) this.loadGis().catch(() => { });
+    setInterval(() => { if (document.visibilityState === 'visible' && this.tokenOk()) this.run(false); }, 60000);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && this.tokenOk()) this.soon(300); });
+    window.addEventListener('online', () => this.soon(500));
+    this.paint(); if (this.ready()) this.run(false);
+  },
+  save() { clearTimeout(this._sv); this._sv = setTimeout(() => Store.put('meta', this.st, 'sync').catch(() => { }), 200); },
+  reset() { this.st = SYNC_DEFAULT(); this.K = this.mk = null; this.token = null; this.paint(); },
+  tokenOk() { return !!this.token && Date.now() < this.exp - 60000; },
+  loadGis() { return this._gis || (this._gis = loadScript('https://accounts.google.com/gsi/client')); },
+  async getToken(interactive) {
+    if (this.tokenOk()) return this.token;
+    if (!interactive) throw Object.assign(new Error('serve accesso'), { auth: true });
+    await this.loadGis();
+    return new Promise((res, rej) => {
+      const tc = google.accounts.oauth2.initTokenClient({
+        client_id: CFG.googleClientId, scope: SCOPE, login_hint: this.st.email || undefined, prompt: this.st.consented ? '' : 'consent',
+        callback: r => {
+          if (!r || r.error || !r.access_token) return rej(Object.assign(new Error(r?.error || 'accesso negato'), { auth: true }));
+          this.token = r.access_token; this.exp = Date.now() + (+r.expires_in || 3600) * 1000; this.st.consented = true; this.save();
+          Store.put('meta', { t: this.token, exp: this.exp }, 'tok').catch(() => { }); res(this.token);
+        },
+        error_callback: e => rej(Object.assign(new Error(e?.type === 'popup_closed' ? 'finestra chiusa' : 'accesso non riuscito'), { auth: true }))
+      });
+      tc.requestAccessToken();
+    });
+  },
+  async nameOf(prefix, id) {
+    const k = prefix + id; if (this.names.has(k)) return this.names.get(k);
+    const sig = new Uint8Array(await crypto.subtle.sign('HMAC', this.K.mac, te(prefix + ':' + id)));
+    const nm = prefix + '-' + hex(sig.subarray(0, 16)); this.names.set(k, nm); return nm;
+  },
+  markDirty(id) { if (!this.st.on) return; if (!this.st.dirty.includes(id)) this.st.dirty.push(id); delete this.st.tombs[id]; this.save(); this.soon(); },
+  tomb(ids, reason, delay = 0) {
+    if (!this.st.on) return;
+    for (const id of ids) { this.st.tombs[id] = { at: Date.now(), reason, due: Date.now() + delay }; this.st.dirty = this.st.dirty.filter(x => x !== id); }
+    this.save(); this.soon(delay + 600);
+  },
+  untomb(ids) { for (const id of ids) delete this.st.tombs[id]; this.save(); },
+  soon(ms = 4000) { if (!this.ready()) return; clearTimeout(this.timer); this.timer = setTimeout(() => this.run(false), ms); this.paint(); },
+  setState(s, err = '') { this.state = s; this.err = err; this.paint(); },
+  paint() {
+    const b = $('#btnSync'); if (!b) return;
+    b.hidden = !this.st.on;
+    let s = this.state;
+    if (s !== 'busy' && s !== 'err' && s !== 'auth') s = (this.st.dirty.length || Object.keys(this.st.tombs).length) ? 'pending' : 'ok';
+    b.dataset.state = s;
+    b.setAttribute('aria-label', { busy: 'Sincronizzazione in corso', err: 'Sincronizzazione non riuscita: tocca per riprovare', auth: 'Tocca per sincronizzare con Drive', pending: 'Modifiche da sincronizzare', ok: 'Tutto sincronizzato' }[s]);
+    b.title = b.getAttribute('aria-label');
+  },
+  async run(interactive) {
+    if (!this.ready()) return;
+    if (this.busy) { this.again = true; return; }
+    this.busy = true; this.setState('busy');
+    try {
+      await this.getToken(interactive);
+      await this.pull(); await this.push();
+      this.st.lastSync = Date.now(); this.setState('ok');
+      if (interactive) toast('Sincronizzato con Drive');
+    } catch (e) {
+      if (e.auth) { this.setState('auth'); if (interactive) toast('Accesso a Google non riuscito: ' + e.message); }
+      else if (e.net) { this.setState('err', 'offline'); if (interactive) toast('Nessuna connessione: riprovo più tardi'); }
+      else { this.setState('err', e.message); if (interactive) toast('Sincronizzazione non riuscita: ' + e.message); console.warn(e); }
+    } finally {
+      this.busy = false; this.save();
+      if (this.again) { this.again = false; this.soon(1500); }
+      else if (Object.values(this.st.tombs).some(t => t.due > Date.now())) this.soon(Math.max(...Object.values(this.st.tombs).map(t => t.due)) - Date.now() + 500);
+    }
+  },
+  async pull() {
+    const files = await Drive.list(), old = this.st.idx, idx = {}, dupes = [];
+    for (const f of files) {
+      const e = { id: f.id, mt: f.modifiedTime, size: +f.size || 0, k: f.appProperties?.k || '' };
+      const prev = idx[f.name];
+      if (prev) { if (prev.mt >= e.mt) { dupes.push(e.id); continue; } dupes.push(prev.id); }
+      idx[f.name] = e;
+    }
+    const curName = S.cur && S.cur.sync ? await this.nameOf('n', S.cur.id) : null;
+    let changed = false; const fetchLater = [];
+    for (const [name, e] of Object.entries(idx)) {
+      if (e.k !== 'n' || old[name]?.mt === e.mt) continue;
+      if (name === curName) { if (old[name]) idx[name] = old[name]; else delete idx[name]; continue; }
+      let rec; try { rec = JSON.parse(td(await Crypto.open(this.K.enc, await Drive.download(e.id)))); } catch (err) { if (err.auth || err.net) throw err; console.warn('record illeggibile', name, err); continue; }
+      if (await this.apply(rec, fetchLater)) changed = true;
+    }
+    this.st.idx = idx;
+    for (const id of dupes) Drive.del(id).catch(() => { });
+    if (changed) {
+      for (const n of S.notes.values()) computeAuto(n);
+      renderBoard(); if (!$('#orbit').hidden) buildOrbit(true);
+      this.prefetch(fetchLater);
+    }
+  },
+  async apply(rec, fetchLater) {
+    if (!rec || !rec.id) return false;
+    const L = S.notes.get(rec.id), dirty = this.st.dirty.includes(rec.id);
+    if (L && L.sync === false) return false;
+    if (this.st.tombs[rec.id]) return false;
+    if (rec.deleted) {
+      if (!L) return false;
+      if (dirty && L.updatedAt > rec.at) return false;
+      S.notes.delete(L.id); await Store.del('notes', L.id);
+      for (const v of await Store.versions(L.id)) await Store.del('versions', v.id);
+      this.st.dirty = this.st.dirty.filter(x => x !== L.id);
+      return true;
+    }
+    let added = 0;
+    for (const v of rec.versions || []) if (!(await Store.get('versions', v.id))) { await Store.put('versions', v); added++; }
+    const R = fixNote(rec.note); R.sync = true; delete R.vcount;
+    if (!L || R.updatedAt > L.updatedAt) {
+      await persist(R, { remote: true });
+      for (const b of blobRefs(R)) if (!(await Store.get('blobs', b))) fetchLater.push(b);
+      if (dirty) this.st.dirty = this.st.dirty.filter(x => x !== R.id);
+      if (added && L) this.markDirty(R.id);
+      return true;
+    }
+    if (L.updatedAt > R.updatedAt || added) this.markDirty(L.id);
+    return added > 0;
+  },
+  async push() {
+    for (const [id, t] of Object.entries({ ...this.st.tombs })) {
+      if (t.due > Date.now()) continue;
+      await this.putRec(await this.nameOf('n', id), { id, deleted: true, at: t.at, why: t.reason }, 'n');
+      delete this.st.tombs[id]; this.save();
+    }
+    for (const id of [...this.st.dirty]) {
+      const n = S.notes.get(id);
+      if (!n || !n.sync) { this.st.dirty = this.st.dirty.filter(x => x !== id); continue; }
+      await this.pushBlobs(n);
+      const versions = (await Store.versions(id)).sort((a, b) => b.at - a.at).slice(0, 100);
+      const { vcount, ...note } = n;
+      await this.putRec(await this.nameOf('n', id), { id, at: n.updatedAt, note, versions }, 'n');
+      if (S.notes.get(id)?.updatedAt === n.updatedAt) this.st.dirty = this.st.dirty.filter(x => x !== id);
+      this.save(); this.paint();
+    }
+  },
+  async putRec(name, obj, k) {
+    const bytes = await Crypto.seal(this.K.enc, te(JSON.stringify(obj)));
+    const ex = this.st.idx[name];
+    let r;
+    try { r = await Drive.upload({ name, parents: ['appDataFolder'], appProperties: { k } }, bytes, ex?.id); }
+    catch (e) { if (ex && /Drive 404/.test(e.message)) r = await Drive.upload({ name, parents: ['appDataFolder'], appProperties: { k } }, bytes); else throw e; }
+    this.st.idx[name] = { id: r.id, mt: r.modifiedTime, size: +r.size || bytes.length, k };
+  },
+  async pushBlobs(n) {
+    for (const b of blobRefs(n)) {
+      if (this.st.up.includes(b)) continue;
+      const name = await this.nameOf('b', b);
+      if (!this.st.idx[name]) {
+        const blob = await Store.get('blobs', b); if (!blob) continue;
+        const head = te(JSON.stringify({ t: blob.type || '' })), body = new Uint8Array(await blob.arrayBuffer());
+        const buf = new Uint8Array(4 + head.length + body.length); new DataView(buf.buffer).setUint32(0, head.length); buf.set(head, 4); buf.set(body, 4 + head.length);
+        const bytes = await Crypto.seal(this.K.enc, buf, false);
+        const r = await Drive.upload({ name, parents: ['appDataFolder'], appProperties: { k: 'b' } }, bytes);
+        this.st.idx[name] = { id: r.id, mt: r.modifiedTime, size: +r.size || bytes.length, k: 'b' };
+      }
+      this.st.up.push(b); this.save();
+    }
+  },
+  fetchBlob(id) {
+    if (!this.ready() || !this.tokenOk()) return Promise.resolve(null);
+    if (this.fetching.has(id)) return this.fetching.get(id);
+    const p = (async () => {
+      try {
+        const e = this.st.idx[await this.nameOf('b', id)]; if (!e) return null;
+        const buf = await Crypto.open(this.K.enc, await Drive.download(e.id));
+        const hl = new DataView(buf.buffer, buf.byteOffset).getUint32(0), head = JSON.parse(td(buf.subarray(4, 4 + hl)));
+        const blob = new Blob([buf.subarray(4 + hl)], { type: head.t || '' });
+        await Store.put('blobs', blob, id); if (!this.st.up.includes(id)) { this.st.up.push(id); this.save(); }
+        return blob;
+      } catch (e) { return null; } finally { this.fetching.delete(id); }
+    })();
+    this.fetching.set(id, p); return p;
+  },
+  async prefetch(ids) {
+    for (const id of [...new Set(ids)]) {
+      const e = this.st.idx[await this.nameOf('b', id)];
+      if (e && e.size < 8e6) { await this.fetchBlob(id); await hydrate(board); }
+    }
+  },
+  onFlag(n) { if (!this.st.on) return; if (n.sync) this.markDirty(n.id); else this.tomb([n.id], 'unsync', 0); },
+
+  /* ---- attivazione */
+  async enable() {
+    if (IN_FRAME) return toast('La sincronizzazione funziona nella versione installata');
+    if (!CFG.googleClientId) return this.needsConfig();
+    try { await this.getToken(true); } catch (e) { return toast('Accesso a Google non riuscito: ' + e.message); }
+    try { const a = await Drive.about(); this.st.email = a?.user?.emailAddress || ''; } catch (e) { }
+    let files; try { files = await Drive.list(); } catch (e) { return toast('Non riesco a leggere Drive: ' + e.message); }
+    const kf = files.find(f => f.name === 'keyring.json');
+    if (kf && this.mk) { try { const kr = JSON.parse(td(await Drive.download(kf.id))); this.K = await Crypto.verify(kr, this.mk); return this.activate(false); } catch (e) { } }
+    if (kf) this.askPass(kf.id); else this.createPass();
+  },
+  needsConfig() {
+    openSheet(`<h2>Manca un passaggio</h2><p class="note">Per collegarsi al tuo Google Drive l'app ha bisogno di un «ID client» Google, che crei una volta sola e gratis nella Google Cloud Console. I passi sono nel file README.md; poi incolli l'ID nel file config.js su GitHub.</p><div class="btns"><button class="btn primary" data-x>Ho capito</button></div>`).onclick = e => { if (e.target.closest('[data-x]')) closeSheet(); };
+  },
+  createPass() {
+    const sh = openSheet(`<h2>Crea la frase segreta</h2>
+      <p class="note">Cifra tutte le note prima che lascino il dispositivo: Google vede solo dati illeggibili. La userai per collegare il PC o un nuovo telefono.</p>
+      <label class="field">Frase segreta (almeno 10 caratteri)<input id="pp1" type="password" autocomplete="new-password"></label>
+      <label class="field" style="margin-top:10px">Ripetila<input id="pp2" type="password" autocomplete="new-password"></label>
+      <p class="note" id="ppErr" role="alert"></p>
+      <div class="btns"><button class="btn" data-x>Annulla</button><button class="btn primary" id="ppGo">Crea e cifra</button></div>`);
+    setTimeout(() => $('#pp1')?.focus(), 80);
+    sh.onclick = async e => {
+      if (e.target.closest('[data-x]')) return closeSheet();
+      if (!e.target.closest('#ppGo')) return;
+      const a = $('#pp1').value, b = $('#pp2').value, err = $('#ppErr');
+      if (a.length < 10) { err.textContent = 'Usa almeno 10 caratteri: una frase di più parole è facile da ricordare e difficile da indovinare.'; return; }
+      if (a !== b) { err.textContent = 'Le due frasi non coincidono.'; return; }
+      err.textContent = 'Preparo la chiave…'; e.target.closest('#ppGo').disabled = true;
+      try {
+        const mk = rand(32), kr = await Crypto.makeKeyring(a, mk);
+        await this.getToken(false);
+        await Drive.upload({ name: 'keyring.json', parents: ['appDataFolder'], appProperties: { k: 'key' } }, te(JSON.stringify(kr)));
+        this.mk = mk; this.K = await Crypto.keys(mk); await Store.put('meta', mk, 'mk');
+        this.showCode(true);
+      } catch (x) { err.textContent = 'Non riuscito: ' + x.message; e.target.closest('#ppGo').disabled = false; }
+    };
+  },
+  askPass(fileId) {
+    let mode = 'pass';
+    const sh = openSheet('<div id="apBox"></div>');
+    const render = () => {
+      $('#apBox').innerHTML = mode === 'pass'
+        ? `<h2>Collega questo dispositivo</h2><p class="note">Su Drive ci sono già note cifrate. Inserisci la frase segreta che hai creato sull'altro dispositivo.</p>
+          <label class="field">Frase segreta<input id="apIn" type="password" autocomplete="current-password"></label>`
+        : `<h2>Usa la chiave di recupero</h2><p class="note">È il codice di 52 caratteri che hai salvato quando hai creato la frase segreta.</p>
+          <label class="field">Chiave di recupero<input id="apIn" autocomplete="off" spellcheck="false" style="font-family:var(--f-mono); text-transform:uppercase"></label>`;
+      $('#apBox').innerHTML += `<p class="note" id="apErr" role="alert"></p><div class="btns"><button class="btn" data-mode>${mode === 'pass' ? 'Ho solo la chiave di recupero' : 'Usa la frase segreta'}</button><button class="btn primary" id="apGo">Sblocca</button></div>`;
+      setTimeout(() => $('#apIn')?.focus(), 80);
+    };
+    render();
+    const go = async () => {
+      const v = $('#apIn').value.trim(), err = $('#apErr'); if (!v) return;
+      err.textContent = 'Verifico…'; $('#apGo').disabled = true;
+      try {
+        await this.getToken(false);
+        const kr = JSON.parse(td(await Drive.download(fileId)));
+        let mk;
+        if (mode === 'pass') mk = await Crypto.unlock(kr, v);
+        else { mk = b32dec(v); if (mk.length < 32) throw new Error('codice'); mk = mk.subarray(0, 32); }
+        this.K = await Crypto.verify(kr, mk); this.mk = new Uint8Array(mk); await Store.put('meta', this.mk, 'mk');
+        closeSheet(); this.activate(true);
+      } catch (x) {
+        err.textContent = x.message === 'frase' ? 'Frase segreta errata.' : /codice|carattere|operation|decrypt/i.test(x.message + x.name) ? 'Chiave di recupero non valida.' : 'Non riuscito: ' + x.message;
+        $('#apGo').disabled = false;
+      }
+    };
+    sh.onclick = e => { if (e.target.closest('[data-mode]')) { mode = mode === 'pass' ? 'code' : 'pass'; render(); } else if (e.target.closest('#apGo')) go(); };
+    sh.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); go(); } };
+  },
+  showCode(first) {
+    if (!this.mk) return toast('Su questo dispositivo la sincronizzazione non è attiva');
+    const code = groupCode(b32enc(this.mk));
+    const sh = openSheet(`<h2>Chiave di recupero</h2>
+      <p class="note">Se dimentichi la frase segreta, questo codice è l'unico modo per leggere le note su Drive. Conservalo fuori dal telefono: su carta o in un gestore di password.</p>
+      <div style="font-family:var(--f-mono); font-size:16px; line-height:1.7; background:var(--soft); border-radius:12px; padding:12px 14px; user-select:all; -webkit-user-select:all; word-spacing:2px" id="rcCode">${code.split('-').join(' ')}</div>
+      <div class="btns"><button class="btn" id="rcCopy">${ic('copy', 'ic s')} Copia</button></div>
+      ${first ? `<label class="check" style="margin-top:8px"><input type="checkbox" id="rcOk"> L'ho salvata in un posto sicuro</label><div class="btns"><button class="btn primary" id="rcDone" disabled>Attiva la sincronizzazione</button></div>` : `<div class="btns"><button class="btn primary" data-x>Chiudi</button></div>`}`);
+    sh.onchange = e => { if (e.target.id === 'rcOk') $('#rcDone').disabled = !e.target.checked; };
+    sh.onclick = async e => {
+      if (e.target.closest('#rcCopy')) { try { await navigator.clipboard.writeText(code); toast('Chiave copiata'); } catch (x) { toast('Seleziona il codice e copialo a mano'); } }
+      if (e.target.closest('[data-x]')) closeSheet();
+      if (e.target.closest('#rcDone')) { closeSheet(); this.activate(true); }
+    };
+  },
+  activate(first) {
+    this.st.on = true;
+    for (const n of S.notes.values()) if (n.sync && !this.st.dirty.includes(n.id)) this.st.dirty.push(n.id);
+    this.save(); this.paint();
+    toast(first ? 'Sincronizzazione attiva: le note vengono cifrate e caricate' : 'Sincronizzazione riattivata');
+    this.run(false);
+  },
+  disable() { this.st.on = false; clearTimeout(this.timer); this.save(); this.paint(); toast('Sincronizzazione sospesa: le note restano su questo dispositivo'); },
+  async disconnect() {
+    try { if (this.token && window.google?.accounts?.oauth2) google.accounts.oauth2.revoke(this.token, () => { }); } catch (e) { }
+    await Store.del('meta', 'mk').catch(() => { }); await Store.del('meta', 'tok').catch(() => { });
+    this.reset(); this.save(); toast('Scollegato da Google Drive');
+  },
+  async wipeRemote() {
+    await this.getToken(true);
+    const files = await Drive.list(); let k = 0;
+    for (const f of files) { await Drive.del(f.id); k++; }
+    await this.disconnect();
+    toast(`Eliminati ${k} file da Drive. Scollega anche gli altri dispositivi.`, 6000);
+  }
+};
+function blobRefs(n) {
+  const out = new Set(); for (const m of String(n.html || '').matchAll(/data-(?:blob|src)="([^"]+)"/g)) out.add(m[1]);
+  if (n.color?.t === 'photo' && n.color.blob) out.add(n.color.blob); return [...out];
+}
+
+$('#btnSync').addEventListener('click', () => Sync.ready() ? Sync.run(true) : openSettings());
+
 async function seed() {
   const mk = (o, ago) => { const n = newNote(); Object.assign(n, o); n.createdAt = n.updatedAt = Date.now() - ago; return n; };
   const notes = [
-    mk({ title: 'Benvenuto in Taccuino', html: '<div>Scrivi subito: la nota parte sempre come testo.</div><div>Dalla barra in basso inserisci foto, audio, video, link, posizione e liste <b>dove si trova il cursore</b>.</div><div><br></div><div>Tieni premuta una scheda in bacheca per cambiarne il colore. Il pulsante orbita in alto mostra le note raggruppate per argomento.</div><div><br></div><div>Scrivi #parola per aggiungere un\'etichetta al volo.</div>', color: { t: 'tok', id: 'blue' }, labels: ['esempio'], pinned: true }, 6e4),
-    mk({ title: 'Lista della spesa', html: '<ul class="chk"><li class="done">pane</li><li>caffè</li><li>pile AA</li></ul>', color: { t: 'tok', id: 'green' }, labels: ['esempio', 'casa'] }, 36e5),
-    mk({ title: '', html: '<figure class="blk quote" contenteditable="false" data-type="quote" data-book="Il Saggiatore — G. Galilei" data-page="25"><blockquote contenteditable="true">La filosofia è scritta in questo grandissimo libro che continuamente ci sta aperto innanzi a gli occhi (io dico l\'universo).</blockquote><figcaption>Il Saggiatore — G. Galilei · p. 25</figcaption></figure>', color: { t: 'tok', id: 'yellow' }, labels: ['esempio', 'letture'] }, 864e5),
-    mk({ title: 'Idee per il weekend', html: '<div>Sentiero dopo il ponte, circa 40 minuti di salita. Tornare in primavera con il treppiede.</div>', color: { t: 'grad', a: '#FFE29A', b: '#F7B2C4', dir: '135deg', name: 'Gradiente' }, labels: ['esempio'] }, 3 * 864e5)
+    mk({ title: 'Benvenuto in Taccuino', html: '<div>Scrivi subito: la nota parte sempre come testo.</div><div>Dalla barra in basso inserisci foto, audio, video, link, posizione e liste <b>dove si trova il cursore</b>.</div><div><br></div><div>Tieni premuta una scheda per selezionarla, anche insieme ad altre: poi puoi cambiare colore, condividere o eliminare. Il pulsante orbita in alto mostra le note raggruppate per argomento.</div><div><br></div><div>Scrivi #parola per aggiungere un\'etichetta al volo.</div>', color: { t: 'tok', id: 'blue' }, labels: ['esempio'], pinned: true, sync: false }, 6e4),
+    mk({ title: 'Lista della spesa', html: '<ul class="chk"><li class="done">pane</li><li>caffè</li><li>pile AA</li></ul>', color: { t: 'tok', id: 'green' }, labels: ['esempio', 'casa'], sync: false }, 36e5),
+    mk({ title: '', html: '<figure class="blk quote" contenteditable="false" data-type="quote" data-book="Il Saggiatore — G. Galilei" data-page="25"><blockquote contenteditable="true">La filosofia è scritta in questo grandissimo libro che continuamente ci sta aperto innanzi a gli occhi (io dico l\'universo).</blockquote><figcaption>Il Saggiatore — G. Galilei · p. 25</figcaption></figure>', color: { t: 'tok', id: 'yellow' }, labels: ['esempio', 'letture'], sync: false }, 864e5),
+    mk({ title: 'Idee per il weekend', html: '<div>Sentiero dopo il ponte, circa 40 minuti di salita. Tornare in primavera con il treppiede.</div>', color: { t: 'grad', a: '#FFE29A', b: '#F7B2C4', dir: '135deg', name: 'Gradiente' }, labels: ['esempio'], sync: false }, 3 * 864e5)
   ];
   for (const n of notes) {
     const t = document.createElement('div'); t.innerHTML = n.html; t.style.cssText = 'position:absolute;left:-9999px;width:600px'; document.body.appendChild(t);
@@ -1738,6 +2391,7 @@ async function boot() {
   if (!S.notes.size && !(await Store.get('meta', 'seeded'))) await seed();
   for (const n of S.notes.values()) if (!n.autoLabels) computeAuto(n);
   renderBoard();
+  Sync.init();
   if (!IN_FRAME && 'serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => { });
   if (!IN_FRAME && navigator.storage?.persist) navigator.storage.persist().catch(() => { });
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveCurrent(); });
